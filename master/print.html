@@ -239,6 +239,56 @@ on the closest pairs found and selections are not required; use counts to act in
 <li><code>mr([</code> to replace the parens with square brackets</li>
 </ul>
 <p>Multiple characters are currently not supported, but planned.</p>
+<h2 id="syntax-tree-motions"><a class="header" href="#syntax-tree-motions">Syntax-tree Motions</a></h2>
+<p><code>A-p</code>, <code>A-o</code>, <code>A-i</code>, and <code>A-n</code> (or <code>Alt</code> and arrow keys) move the primary
+selection according to the selection's place in the syntax tree. Let's walk
+through an example to get familiar with them. Many languages have a syntax like
+so for function calls:</p>
+<pre><code>func(arg1, arg2, arg3)
+</code></pre>
+<p>A function call might be parsed by tree-sitter into a tree like the following.</p>
+<pre><code class="language-tsq">(call
+  function: (identifier) ; func
+  arguments:
+    (arguments           ; (arg1, arg2, arg3)
+      (identifier)       ; arg1
+      (identifier)       ; arg2
+      (identifier)))     ; arg3
+</code></pre>
+<p>Use <code>:tree-sitter-subtree</code> to view the syntax tree of the primary selection. In
+a more intuitive tree format:</p>
+<pre><code>            ┌────┐
+            │call│
+      ┌─────┴────┴─────┐
+      │                │
+┌─────▼────┐      ┌────▼────┐
+│identifier│      │arguments│
+│  &quot;func&quot;  │ ┌────┴───┬─────┴───┐
+└──────────┘ │        │         │
+             │        │         │
+   ┌─────────▼┐  ┌────▼─────┐  ┌▼─────────┐
+   │identifier│  │identifier│  │identifier│
+   │  &quot;arg1&quot;  │  │  &quot;arg2&quot;  │  │  &quot;arg3&quot;  │
+   └──────────┘  └──────────┘  └──────────┘
+</code></pre>
+<p>Say we have a selection that wraps <code>arg1</code>. The selection is on the <code>arg1</code> leaf
+in the tree above.</p>
+<pre><code>func([arg1], arg2, arg3)
+</code></pre>
+<p>Using <code>A-n</code> would select the next sibling in the syntax tree: <code>arg2</code>.</p>
+<pre><code>func(arg1, [arg2], arg3)
+</code></pre>
+<p>While <code>A-o</code> would expand the selection to the parent node. In the tree above we
+can see that we would select the <code>arguments</code> node.</p>
+<pre><code>func[(arg1, arg2, arg3)]
+</code></pre>
+<p>There is also some nuanced behavior that prevents you from getting stuck on a
+node with no sibling. If we have a selection on <code>arg1</code>, <code>A-p</code> would bring us
+to the previous child node. Since <code>arg1</code> doesn't have a sibling to its left,
+though, we climb the syntax tree and then take the previous selection. So <code>A-p</code>
+will move the selection over to the &quot;func&quot; <code>identifier</code>.</p>
+<pre><code>[func](arg1, arg2, arg3)
+</code></pre>
 <h2 id="textobjects"><a class="header" href="#textobjects">Textobjects</a></h2>
 <p>Currently supported: <code>word</code>, <code>surround</code>, <code>function</code>, <code>class</code>, <code>parameter</code>.</p>
 <p><img src="https://user-images.githubusercontent.com/23398472/124231131-81a4bb00-db2d-11eb-9d10-8e577ca7b177.gif" alt="textobject-demo" />
@@ -375,6 +425,7 @@ and therefore requires the corresponding query file to work properly.</p>
 <tr><td><code>%</code></td><td>Select entire file</td><td><code>select_all</code></td></tr>
 <tr><td><code>x</code></td><td>Select current line, if already selected, extend to next line</td><td><code>extend_line</code></td></tr>
 <tr><td><code>X</code></td><td>Extend selection to line bounds (line-wise selection)</td><td><code>extend_to_line_bounds</code></td></tr>
+<tr><td><code>Alt-x</code></td><td>Shrink selection to line bounds (line-wise selection)</td><td><code>shrink_to_line_bounds</code></td></tr>
 <tr><td><code>J</code></td><td>Join lines inside selection</td><td><code>join_selections</code></td></tr>
 <tr><td><code>K</code></td><td>Keep selections matching the regex</td><td><code>keep_selections</code></td></tr>
 <tr><td><code>Alt-K</code></td><td>Remove selections matching the regex</td><td><code>remove_selections</code></td></tr>
@@ -594,6 +645,7 @@ you to selectively add search terms to your selections.</p>
 <tr><td><code>Ctrl-s</code></td><td>Insert a word under doc cursor, may be changed to Ctrl-r Ctrl-w later</td></tr>
 <tr><td><code>Ctrl-p</code>, <code>Up</code></td><td>Select previous history</td></tr>
 <tr><td><code>Ctrl-n</code>, <code>Down</code></td><td>Select next history</td></tr>
+<tr><td><code>Ctrl-r</code></td><td>Insert the content of the register selected by following input char</td></tr>
 <tr><td><code>Tab</code></td><td>Select next completion item</td></tr>
 <tr><td><code>BackTab</code></td><td>Select previous completion item</td></tr>
 <tr><td><code>Enter</code></td><td>Open selected</td></tr>
@@ -714,7 +766,7 @@ Languages</a> guide for more language configuration information.</p>
 <tr><td>heex</td><td>✓</td><td></td><td></td><td></td></tr>
 <tr><td>html</td><td>✓</td><td></td><td></td><td><code>vscode-html-language-server</code></td></tr>
 <tr><td>iex</td><td>✓</td><td></td><td></td><td></td></tr>
-<tr><td>java</td><td>✓</td><td></td><td></td><td></td></tr>
+<tr><td>java</td><td>✓</td><td></td><td></td><td><code>jdtls</code></td></tr>
 <tr><td>javascript</td><td>✓</td><td></td><td>✓</td><td><code>typescript-language-server</code></td></tr>
 <tr><td>json</td><td>✓</td><td></td><td>✓</td><td><code>vscode-json-language-server</code></td></tr>
 <tr><td>jsx</td><td>✓</td><td></td><td>✓</td><td><code>typescript-language-server</code></td></tr>
@@ -726,7 +778,7 @@ Languages</a> guide for more language configuration information.</p>
 <tr><td>llvm</td><td>✓</td><td>✓</td><td>✓</td><td></td></tr>
 <tr><td>llvm-mir</td><td>✓</td><td>✓</td><td>✓</td><td></td></tr>
 <tr><td>llvm-mir-yaml</td><td>✓</td><td></td><td>✓</td><td></td></tr>
-<tr><td>lua</td><td>✓</td><td></td><td>✓</td><td></td></tr>
+<tr><td>lua</td><td>✓</td><td></td><td>✓</td><td><code>lua-language-server</code></td></tr>
 <tr><td>make</td><td>✓</td><td></td><td></td><td></td></tr>
 <tr><td>markdown</td><td>✓</td><td></td><td></td><td></td></tr>
 <tr><td>meson</td><td>✓</td><td></td><td>✓</td><td></td></tr>
@@ -752,8 +804,10 @@ Languages</a> guide for more language configuration information.</p>
 <tr><td>ruby</td><td>✓</td><td>✓</td><td>✓</td><td><code>solargraph</code></td></tr>
 <tr><td>rust</td><td>✓</td><td>✓</td><td>✓</td><td><code>rust-analyzer</code></td></tr>
 <tr><td>scala</td><td>✓</td><td></td><td>✓</td><td><code>metals</code></td></tr>
+<tr><td>scheme</td><td>✓</td><td></td><td></td><td></td></tr>
 <tr><td>solidity</td><td>✓</td><td></td><td></td><td><code>solc</code></td></tr>
 <tr><td>sql</td><td>✓</td><td></td><td></td><td></td></tr>
+<tr><td>sshclientconfig</td><td>✓</td><td></td><td></td><td></td></tr>
 <tr><td>svelte</td><td>✓</td><td></td><td>✓</td><td><code>svelteserver</code></td></tr>
 <tr><td>swift</td><td>✓</td><td></td><td></td><td><code>sourcekit-lsp</code></td></tr>
 <tr><td>tablegen</td><td>✓</td><td>✓</td><td>✓</td><td></td></tr>
@@ -764,6 +818,7 @@ Languages</a> guide for more language configuration information.</p>
 <tr><td>twig</td><td>✓</td><td></td><td></td><td></td></tr>
 <tr><td>typescript</td><td>✓</td><td></td><td>✓</td><td><code>typescript-language-server</code></td></tr>
 <tr><td>vala</td><td>✓</td><td></td><td></td><td><code>vala-language-server</code></td></tr>
+<tr><td>verilog</td><td>✓</td><td>✓</td><td></td><td><code>svlangserver</code></td></tr>
 <tr><td>vue</td><td>✓</td><td></td><td></td><td><code>vls</code></td></tr>
 <tr><td>wgsl</td><td>✓</td><td></td><td></td><td></td></tr>
 <tr><td>yaml</td><td>✓</td><td></td><td>✓</td><td><code>yaml-language-server</code></td></tr>
@@ -1175,6 +1230,7 @@ over it and is merged into the default palette.</p>
 </ul>
 <table><thead><tr><th>Key</th><th>Notes</th></tr></thead><tbody>
 <tr><td><code>ui.background</code></td><td></td></tr>
+<tr><td><code>ui.background.separator</code></td><td>Picker separator below input line</td></tr>
 <tr><td><code>ui.cursor</code></td><td></td></tr>
 <tr><td><code>ui.cursor.insert</code></td><td></td></tr>
 <tr><td><code>ui.cursor.select</code></td><td></td></tr>
@@ -1201,7 +1257,11 @@ over it and is merged into the default palette.</p>
 <tr><td><code>error</code></td><td>Diagnostics error (gutter)</td></tr>
 <tr><td><code>info</code></td><td>Diagnostics info (gutter)</td></tr>
 <tr><td><code>hint</code></td><td>Diagnostics hint (gutter)</td></tr>
-<tr><td><code>diagnostic</code></td><td>For text in editing area</td></tr>
+<tr><td><code>diagnostic</code></td><td>Diagnostics fallback style (editing area)</td></tr>
+<tr><td><code>diagnostic.hint</code></td><td>Diagnostics hint (editing area)</td></tr>
+<tr><td><code>diagnostic.info</code></td><td>Diagnostics info (editing area)</td></tr>
+<tr><td><code>diagnostic.warning</code></td><td>Diagnostics warning (editing area)</td></tr>
+<tr><td><code>diagnostic.error</code></td><td>Diagnostics error (editing area)</td></tr>
 </tbody></table>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="key-remapping"><a class="header" href="#key-remapping">Key Remapping</a></h1>
 <p>One-way key remapping is temporarily supported via a simple TOML configuration
