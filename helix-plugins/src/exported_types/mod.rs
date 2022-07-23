@@ -3,7 +3,7 @@ use rhai::plugin::*;
 /// See: https://rhai.rs/book/plugins/module.html
 #[export_module]
 pub mod mouse_event_kind {
-    pub type MouseEventKind = crate::plugin_events::MouseEventKind;
+    pub type MouseEventKind = crate::events::MouseEventKind;
 
     #[rhai_fn(name = "to_string", pure)]
     pub fn to_string(kind: &mut MouseEventKind) -> String {
@@ -19,9 +19,9 @@ pub mod mouse_event_kind {
 /// See: https://rhai.rs/book/plugins/module.html
 #[export_module]
 pub mod mouse_event {
-    pub type MouseEventKind = crate::plugin_events::MouseEventKind;
-    pub type MouseEvent = crate::plugin_events::MouseEvent;
-    pub type KeyModifiers = crate::plugin_events::KeyModifiers;
+    pub type MouseEventKind = crate::events::MouseEventKind;
+    pub type MouseEvent = crate::events::MouseEvent;
+    pub type KeyModifiers = crate::events::KeyModifiers;
 
     #[rhai_fn(get = "kind", pure)]
     pub fn get_kind(event: &mut MouseEvent) -> MouseEventKind {
@@ -57,7 +57,7 @@ pub mod mouse_event {
 /// See: https://rhai.rs/book/plugins/module.html
 #[export_module]
 pub mod key_modifiers {
-    pub type KeyModifiers = crate::plugin_events::KeyModifiers;
+    pub type KeyModifiers = crate::events::KeyModifiers;
 
     #[rhai_fn(get = "shift", pure)]
     pub fn get_shift(modifiers: &mut KeyModifiers) -> bool {
@@ -78,9 +78,9 @@ pub mod key_modifiers {
 /// See: https://rhai.rs/book/plugins/module.html
 #[export_module]
 pub mod key_event {
-    pub type KeyEvent = crate::plugin_events::KeyEvent;
-    pub type KeyCode = crate::plugin_events::KeyCode;
-    pub type KeyModifiers = crate::plugin_events::KeyModifiers;
+    pub type KeyEvent = crate::events::KeyEvent;
+    pub type KeyCode = crate::events::KeyCode;
+    pub type KeyModifiers = crate::events::KeyModifiers;
 
     #[rhai_fn(get = "code", pure)]
     pub fn get_code(key_event: &mut KeyEvent) -> KeyCode {

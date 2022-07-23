@@ -3,9 +3,9 @@ use crossterm::event::Event;
 use helix_loader::plugin_dir;
 use plugin::Plugin;
 
+mod events;
 mod exported_types;
 mod plugin;
-mod plugin_events;
 
 pub struct PluginManager {
     plugins: Vec<Plugin>,
