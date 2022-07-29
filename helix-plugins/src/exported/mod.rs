@@ -1,6 +1,12 @@
 use rhai::plugin::*;
 
+/// Types that are exported from helix for use in plugins
+///
+/// Before a "rhai" script can use a type it needs to be registered
+/// as a module.
+///
 /// See: https://rhai.rs/book/plugins/module.html
+
 #[export_module]
 pub mod mouse_event_kind {
     pub type MouseEventKind = crate::events::MouseEventKind;
@@ -16,7 +22,6 @@ pub mod mouse_event_kind {
     }
 }
 
-/// See: https://rhai.rs/book/plugins/module.html
 #[export_module]
 pub mod mouse_event {
     pub type MouseEventKind = crate::events::MouseEventKind;
@@ -54,7 +59,6 @@ pub mod mouse_event {
     }
 }
 
-/// See: https://rhai.rs/book/plugins/module.html
 #[export_module]
 pub mod key_modifiers {
     pub type KeyModifiers = crate::events::KeyModifiers;
@@ -75,7 +79,6 @@ pub mod key_modifiers {
     }
 }
 
-/// See: https://rhai.rs/book/plugins/module.html
 #[export_module]
 pub mod key_event {
     pub type KeyEvent = crate::events::KeyEvent;

@@ -4,7 +4,7 @@ use helix_loader::plugin_dir;
 use plugin::Plugin;
 
 mod events;
-mod exported_types;
+mod exported;
 mod plugin;
 
 pub struct PluginManager {

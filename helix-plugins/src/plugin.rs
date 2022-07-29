@@ -45,26 +45,16 @@ fn register_global_types_module(engine: &mut Engine) {
     combine_with_exported_module!(
         &mut module,
         "mouse_event_kind",
-        crate::exported_types::mouse_event_kind
+        crate::exported::mouse_event_kind
     );
-    combine_with_exported_module!(
-        &mut module,
-        "mouse_event",
-        crate::exported_types::mouse_event
-    );
-    combine_with_exported_module!(
-        &mut module,
-        "key_modifiers",
-        crate::exported_types::key_modifiers
-    );
-    combine_with_exported_module!(&mut module, "key_event", crate::exported_types::key_event);
+    combine_with_exported_module!(&mut module, "mouse_event", crate::exported::mouse_event);
+    combine_with_exported_module!(&mut module, "key_modifiers", crate::exported::key_modifiers);
+    combine_with_exported_module!(&mut module, "key_event", crate::exported::key_event);
 
     engine.register_global_module(module.into());
 }
 
-fn get_plugin_name_and_script(entry: Result<DirEntry, std::io::Error>) -> Result<(String, String)> {
-    let entry: DirEntry = entry?;
-
+fn get_plugin_name_and_script(entry: DirEntry) -> Result<(String, String)> {
     let path: PathBuf = entry.path();
     let extension: &OsStr = path.extension().ok_or_else(|| {
         anyhow!(
@@ -96,7 +86,8 @@ impl TryFrom<Result<DirEntry, std::io::Error>> for Plugin {
     type Error = Error;
 
     fn try_from(value: Result<DirEntry, std::io::Error>) -> Result<Self, Self::Error> {
-        let (name, script) = get_plugin_name_and_script(value)?;
+        let entry: DirEntry = value?;
+        let (name, script) = get_plugin_name_and_script(entry)?;
 
         let mut engine = Engine::new_raw();
 
@@ -123,12 +114,6 @@ impl TryFrom<Result<DirEntry, std::io::Error>> for Plugin {
 }
 
 impl Plugin {
-    pub fn start(&mut self) -> Result<()> {
-        self.on_start()?;
-
-        Ok(())
-    }
-
     fn call_script_event_handler_fn(
         &mut self,
         name: &str,
@@ -152,6 +137,12 @@ impl Plugin {
                 e => Err(anyhow!("Failed to call {}: {}", name, e)),
             },
         };
+    }
+
+    pub fn start(&mut self) -> Result<()> {
+        self.on_start()?;
+
+        Ok(())
     }
 
     pub fn on_key_press(&mut self, key_press_event: crossterm::event::KeyEvent) -> Result<()> {
